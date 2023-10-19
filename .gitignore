@@ -1,0 +1,12 @@
+# Файлы
+server.db
+Makefile
+requirements.txt
+data_base.csv
+accounts.py
+
+#Папки
+/.idea
+/__pycache__
+/venv
+/.mypy_cache
