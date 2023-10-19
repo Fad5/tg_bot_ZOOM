@@ -202,7 +202,7 @@ async def start_handler(massage: types.Message):
 
 
 @dp.message_handler(commands='next_week')
-async def get_tomorrow_work_day(massage: types.Message):
+async def get_next_week_work(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
@@ -219,7 +219,7 @@ async def get_tomorrow_work_day(massage: types.Message):
 
 
 @dp.message_handler(commands='current_week')
-async def get_tomorrow_work_day(massage: types.Message):
+async def get_current_week_work(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
@@ -235,7 +235,7 @@ async def get_tomorrow_work_day(massage: types.Message):
 
 
 @dp.message_handler(commands='last_week')
-async def get_tomorrow_work_day(massage: types.Message):
+async def get_last_week_work(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
@@ -251,7 +251,7 @@ async def get_tomorrow_work_day(massage: types.Message):
 
 
 @dp.message_handler(commands='today')
-async def get_tomorrow_work_day(massage: types.Message):
+async def get_today_work_day(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
