@@ -14,19 +14,24 @@ def date_formating(txt):
     return date_datetime
 
 
-def from_watch_in_hours(element):
+def from_watch_in_hours(element:str):
+    """
+    Функция принимает переменную (XX.XX-XX.XX) типа str, обрабатываем значение(меняем . на :, меняем , на .), 
+    разделяет методом split по знаку "-", (XX:XX,XX:XX), получаем сумму минут от преого и второго значнеие, 
+    находм разницу и взовращаем это значение
+    """
     if element == '':
         return 0
     else:
         formating_element = (element.replace(' ', '').replace('.', ':').replace(',', '.'))
         formating_element = formating_element.split('-')
-        hours =  formating_element[0].find(':')
-        minutes =  formating_element[1].find(':')
-        summa_minutes = (int( formating_element[1][:minutes]) * 60 + int( formating_element[1][minutes + 1:]))
-        - (int( formating_element[0][:hours]) * 60 + int( formating_element[0][hours + 1:]))
-        summa_hours = summa_minutes / 60
-        return summa_hours
-
+        firts_time =  formating_element[0].find(':')
+        second_time =  formating_element[1].find(':')
+        start_time =  int(formating_element[0][:firts_time]) * 60 + int(formating_element[0][firts_time+1:])
+        finish_time = int(formating_element[1][:second_time]) * 60 + int(formating_element[1][second_time+1:])
+        summa_hours = finish_time - start_time
+        resault = summa_hours / 60
+        return resault
 
 def get_info_work_day(user):
     """
