@@ -1,6 +1,7 @@
 import csv
 import datetime
 from value_sort import days
+from config import invalid_link_to_post
 
 
 def date_formating(txt):
@@ -123,7 +124,7 @@ def read_js_hours(work_day:dict, date_base_day:list):
     data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
     if data_sort in date_base_day:
         if work_day['Webinar link'] != "":
-            if work_day['Link to post'] != "":
+            if work_day['Link to post'] not in invalid_link_to_post:
                 hours = work_day['Hours']
                 print_hours_day = f'🗓 {work_day["Data"]}    🕰 {str(work_day["Hours"])}\n'
                 return hours, print_hours_day
