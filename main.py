@@ -327,6 +327,8 @@ async def get_hours_summa_current(massage: types.Message, summa: int = 0, print_
                 summa = summa + hours[0]
                 print_hours = print_hours + hours[1]
         await bot.send_message(massage.from_user.id, text='🕰 '+str(summa))
+    else:
+       await bot.send_message(massage.from_user.id, text=answer_block)
 
 
 @dp.message_handler(commands=f'get_list_hours_current_month')
@@ -341,6 +343,8 @@ async def get_hours_list_current(massage: types.Message, summa: int = 0, print_h
                 summa = summa + hours[0]
                 print_hours = print_hours + hours[1]
         await bot.send_message(massage.from_user.id, text=print_hours)
+    else:
+       await bot.send_message(massage.from_user.id, text=answer_block)
 
 
 @dp.message_handler(commands=f'get_summa_hours_last_month')
@@ -355,6 +359,8 @@ async def get_hours_summa_last(massage: types.Message, summa: int = 0, print_hou
                 summa = summa + hours[0]
                 print_hours = print_hours + hours[1]
         await bot.send_message(massage.from_user.id, text='🕰 '+str(summa))
+    else:
+       await bot.send_message(massage.from_user.id, text=answer_block)
 
 
 @dp.message_handler(commands=f'get_list_hours_last_month')
@@ -369,16 +375,22 @@ async def get_hours_list_last(massage: types.Message, summa: int = 0, print_hour
                 summa = summa + hours[0]
                 print_hours = print_hours + hours[1]
         await bot.send_message(massage.from_user.id, text=print_hours)
+    else:
+       await bot.send_message(massage.from_user.id, text=answer_block)
 
 
 @dp.message_handler()
 async def get_info_accounts(massage: types.Message):
-    if massage.text.lower() == 'аккаунты zoom':
-        await bot.send_message(massage.from_user.id, '<b>Аккаунты ZOOM</b>', parse_mode='HTML',
-                               reply_markup=get_keyboard('ZOOM', ACCOUNTS_ZOOM))
-    elif massage.text.lower() == 'операторы webinar.ru':
-        await bot.send_message(massage.from_user.id, '<b>Операторы Webinar.ru</b>', parse_mode='HTML',
-                               reply_markup=get_keyboard('webinar', ACCOUNTS_WEBINAR))
+    result = get_user_name(massage.from_user.id, 'user')
+    if result != None:
+        if massage.text.lower() == 'аккаунты zoom':
+            await bot.send_message(massage.from_user.id, '<b>Аккаунты ZOOM</b>', parse_mode='HTML',
+                                   reply_markup=get_keyboard('ZOOM', ACCOUNTS_ZOOM))
+        elif massage.text.lower() == 'операторы webinar.ru':
+            await bot.send_message(massage.from_user.id, '<b>Операторы Webinar.ru</b>', parse_mode='HTML',
+                                   reply_markup=get_keyboard('webinar', ACCOUNTS_WEBINAR))
+    else:
+       await bot.send_message(massage.from_user.id, text=answer_block)
 
 
 @dp.callback_query_handler(text_contains='ZOOM')
