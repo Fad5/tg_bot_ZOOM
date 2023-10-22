@@ -90,3 +90,13 @@ def get_user_name(id_tg: int,database:str='user')->str:
         user_name = i
         return user_name[0]
 
+def show_table() -> list:
+    db = sqlite3.connect(file_db)
+    sql = db.cursor()
+    list_datebase = []
+    sql.execute("""select * from sqlite_master
+            where type = 'table'""")
+    tables = sql.fetchall()
+    for table in tables:
+        list_datebase.append(table[1])
+    return list_datebase

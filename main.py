@@ -8,7 +8,7 @@ from parsing import get_info_work_day, read_js, read_js_day, read_js_hours
 from sort_work_day import create_cvs_file
 from value_sort import get_password_mail
 # Функции для работы с бд
-from def_for_work_date_base import is_user, show_db, del_user_db, add_user_db, update_user_db, get_user_name
+from def_for_work_date_base import is_user, show_db, del_user_db, add_user_db, update_user_db, get_user_name, show_table
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
@@ -21,6 +21,12 @@ kb.add('Аккаунты zoom', 'Операторы Webinar.ru')
 
 
 # Команды для админа
+
+@dp.message_handler(commands='list_db')
+async def list_db(massage: types.Message) -> None:
+        result = show_table()
+        await bot.send_message(massage.from_user.id, text=result)
+
 
 @dp.message_handler(commands='update_user_db')
 async def update_user(massage: types.Message) -> None:
@@ -118,7 +124,8 @@ async def del_user(massage: types.Message) -> None:
     message_split = massage.text.split()
     if len(message_split) == 2:
         if message_split[1].lower() == 'info':
-            await bot.send_message(massage.from_user.id, text='Введите команду ,id, и datebase к которому подключатся \n Пример: /del_user_db 123456 user')
+            await bot.send_message(massage.from_user.id, text='Введите команду, id, и datebase к которому подключатся \n Пример:'
+                         '/del_user_db 123456 user')
     elif len(message_split) == 3:
         datebase =  message_split[2]
         id_tg = int(message_split[1])
@@ -160,11 +167,11 @@ async def add_user(massage: types.Message) -> None:
         if len(message_split) == 2:
             if message_split[1].lower() == 'info':
                 await bot.send_message(massage.from_user.id,
-                                       text='Пример: /add_user_db id_tg user_name \nПервый аргумент: id, второй аргумент:'
-                                            '  имя которое указанное в exel ')
+                                      text='Введите команду, id, и datebase к которому подключатся \n Пример: '
+                                      '/add_user_db 123456 Имя__Фамилия в exel user')
         elif len(message_split) == 4:
             id_tg = int(message_split[1])
-            name_user = message_split[2]
+            name_user = message_split[2].replace('__',' ')
             datebase = message_split[3]
             result = add_user_db(id_tg, name_user,datebase)
             if result == True:
