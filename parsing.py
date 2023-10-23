@@ -10,10 +10,12 @@ def date_formating(txt):
     :param txt:
     :return:
     """
-    date_list = txt.replace('\n', ' ').replace(',', '.').split('.')
-    date_datetime = date_list[2] + '-' + date_list[1] + '-' + date_list[0]
-    return date_datetime
-
+    if txt not in invalid_link_to_post:
+        date_list = txt.replace('\n', ' ').replace(',', '.').split('.')
+        date_datetime = date_list[2] + '-' + date_list[1] + '-' + date_list[0]
+        return date_datetime
+    else:
+        return ''
 
 def from_watch_in_hours(element:str):
     """
@@ -24,12 +26,12 @@ def from_watch_in_hours(element:str):
     if element == '':
         return 0
     else:
-        formating_element = (element.replace(' ', '').replace('.', ':').replace(',', '.'))
-        formating_element = formating_element.split('-')
-        firts_time =  formating_element[0].find(':')
-        second_time =  formating_element[1].find(':')
-        start_time =  int(formating_element[0][:firts_time]) * 60 + int(formating_element[0][firts_time+1:])
-        finish_time = int(formating_element[1][:second_time]) * 60 + int(formating_element[1][second_time+1:])
+        formating_element = (element.replace(' ', '').replace('.', ':').replace(',', '.')).replace('—','-').replace('–','-').replace("−",'-')
+        formating_elements = formating_element.split('-')
+        firts_time =  formating_elements[0].find(':')
+        second_time =  formating_elements[1].find(':')
+        start_time =  int(formating_elements[0][:firts_time]) * 60 + int(formating_elements[0][firts_time+1:])
+        finish_time = int(formating_elements[1][:second_time]) * 60 + int(formating_elements[1][second_time+1:])
         summa_hours = finish_time - start_time
         resault = summa_hours / 60
         return resault
@@ -78,14 +80,13 @@ def read_js(work_day, argument, day_read=1):
     :param day_read:
     :return:
     """
-    if work_day['Data'] == "":
-        pass
-    date_json = work_day['Data']
-    data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
-    if data_sort == days(argument, day=day_read):
-        description_for_show_work_day = (f"🎓 Программа: {work_day['Programm']} \n\n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель: {work_day['Teacher']}\n🗓Дата: "
-                       f"{work_day['Data']}\n🕐Время: {work_day['Trowme']} \n📌Оператор: {work_day['Operator']}\n🔒Акаунт: {work_day['Account']}.")
-        return description_for_show_work_day
+    if work_day['Data'] not in invalid_link_to_post:
+        date_json = work_day['Data']
+        data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
+        if data_sort == days(argument, day=day_read):
+            description_for_show_work_day = (f"🎓 Программа: {work_day['Programm']} \n\n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель: {work_day['Teacher']}\n🗓Дата: "
+                           f"{work_day['Data']}\n🕐Время: {work_day['Trowme']} \n📌Оператор: {work_day['Operator']}\n🔒Акаунт: {work_day['Account']}.")
+            return description_for_show_work_day
     else:
         pass
 
@@ -98,14 +99,14 @@ def read_js_day(work_day:dict, date_base_day:list):
     :param date_base_day:
     :return:
     """
-    if work_day['Data'] == "":
-        pass
-    date_json = work_day['Data']
-    data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
-    if data_sort in date_base_day:
-        description = (f"🎓Программа: {work_day['Programm']} \n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель: {work_day['Teacher']}\n🗓Дата: "
-                       f"{work_day['Data']}\n🕐Время: {work_day['Trowme']} \n📌Оператор: {work_day['Operator']}\n🔒Акаунт: {work_day['Account']}.")
-        return description
+    print(work_day['Data'])
+    if work_day['Data'] not in invalid_link_to_post:
+        date_json = work_day['Data']
+        data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
+        if data_sort in date_base_day:
+            description = (f"🎓Программа: {work_day['Programm']} \n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель: {work_day['Teacher']}\n🗓Дата: "
+                           f"{work_day['Data']}\n🕐Время: {work_day['Trowme']} \n📌Оператор: {work_day['Operator']}\n🔒Акаунт: {work_day['Account']}.")
+            return description
     else:
         pass
 

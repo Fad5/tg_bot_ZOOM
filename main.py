@@ -1,12 +1,11 @@
 import datetime
 
 from aiogram import Bot, Dispatcher, types, executor
-from config import answer_block, LAST_WEEK, \
-    CURRENT, NEXT_WEEK, HOURS_CURRENT_MONTH, HOURS_LAST_MONTH, TEXT_HOLIDAY, list_info
+from config import answer_block, TEXT_HOLIDAY, list_info
 from accounts import TOKEN, ACCOUNTS_ZOOM,ACCOUNTS_WEBINAR
 from parsing import get_info_work_day, read_js, read_js_day, read_js_hours
 from sort_work_day import create_cvs_file
-from value_sort import get_password_mail
+from value_sort import get_password_mail, list_work_day, check_hours_month
 # Функции для работы с бд
 from def_for_work_date_base import is_user, show_db, del_user_db, add_user_db, update_user_db, get_user_name, show_table
 
@@ -24,6 +23,7 @@ kb.add('Аккаунты zoom', 'Операторы Webinar.ru')
 
 @dp.message_handler(commands='list_db')
 async def list_db(massage: types.Message) -> None:
+
         result = show_table()
         await bot.send_message(massage.from_user.id, text=result)
 
@@ -45,15 +45,15 @@ async def update_user(massage: types.Message) -> None:
             if message_split[1].lower() == 'info':
                 await bot.send_message(massage.from_user.id,
                                        text='Пример: /add_user_db id_tg user_name \nПервый аргумент: id или name_user,'
-                                            ' Второй аргумент(новое значение): '
-                                            'Третий аргумент: id_tg Четвертый аргумен: datebase\n\
-                                            Для просмотра баз данных введите команду /list_db')
+                                            '\n Второй аргумент(новое значение): new name\n'
+                                            'Третий аргумент: id_tg Четвертый аргумен: datebase\n'
+                                            'Для просмотра баз данных введите команду /list_db')
         elif len(message_split) == 5:    
             value = message_split[1]
-            new_value = message_split[2]
+            name_user = message_split[2].replace('__',' ')
             id_tg = int(message_split[3])
             datebase = message_split[4]
-            update_user_db(value, new_value, id_tg,datebase)
+            update_user_db(value, name_user, id_tg,datebase)
             await bot.send_message(massage.from_user.id, text='Ок')
         else:
             await bot.send_message(massage.from_user.id, text='Введите команду и id')
@@ -87,7 +87,7 @@ async def check_user(massage: types.Message) -> None:
                 await bot.send_message(massage.from_user.id, text='❗Нет в базе данных')
 
         else:
-            await bot.send_message(massage.from_user.id, text='❗Введите id и команду')
+            await bot.send_message(massage.from_user.id, text='❗Введите id и базу данных')
 
     else:
         await bot.send_message(massage.from_user.id, text='🔒У вас нет доступа')
@@ -201,6 +201,7 @@ def get_keyboard(name_callback, ACCOUNTS):
 
 @dp.message_handler(commands='start')
 async def start_handler(massage: types.Message):
+    print(massage.from_user.id)
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         await massage.answer(f'👋 Привет,{massage.from_user.first_name}!', reply_markup=kb)
@@ -213,7 +214,7 @@ async def get_next_week_work(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
-            info = read_js_day(i, NEXT_WEEK)
+            info = read_js_day(i, list_work_day()[2])
             if info != None:
                 list_info.append(info)
                 await massage.answer(info)
@@ -230,7 +231,7 @@ async def get_current_week_work(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
-            info = read_js_day(i, CURRENT)
+            info = read_js_day(i, list_work_day()[1])
             if info != None:
                 list_info.append(info)
                 await massage.answer(info)
@@ -246,7 +247,7 @@ async def get_last_week_work(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
-            info = read_js_day(i, LAST_WEEK)
+            info = read_js_day(i,list_work_day()[0])
             if info != None:
                 list_info.append(info)
                 await massage.answer(info)
@@ -320,7 +321,7 @@ async def get_hours_summa_current(massage: types.Message, summa: int = 0, print_
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
-            hours = read_js_hours(i, HOURS_CURRENT_MONTH)
+            hours = read_js_hours(i, check_hours_month('current_list_hours'))
             if hours == None:
                 pass
             else:
@@ -336,7 +337,7 @@ async def get_hours_list_current(massage: types.Message, summa: int = 0, print_h
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
-            hours = read_js_hours(i, HOURS_CURRENT_MONTH)
+            hours = read_js_hours(i, check_hours_month('current_list_hours'))
             if hours == None:
                 pass
             else:
@@ -352,7 +353,7 @@ async def get_hours_summa_last(massage: types.Message, summa: int = 0, print_hou
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
-            hours = read_js_hours(i, HOURS_LAST_MONTH)
+            hours = read_js_hours(i, check_hours_month('last_list_hours'))
             if hours == None:
                 pass
             else:
@@ -368,7 +369,7 @@ async def get_hours_list_last(massage: types.Message, summa: int = 0, print_hour
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
-            hours = read_js_hours(i, HOURS_LAST_MONTH)
+            hours = read_js_hours(i, check_hours_month('last_list_hours'))
             if hours == None:
                 pass
             else:
