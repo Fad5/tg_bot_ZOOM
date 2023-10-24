@@ -6,6 +6,7 @@ from accounts import TOKEN, ACCOUNTS_ZOOM,ACCOUNTS_WEBINAR
 from parsing import get_info_work_day, read_js, read_js_day, read_js_hours
 from sort_work_day import create_cvs_file
 from value_sort import get_password_mail, list_work_day, check_hours_month
+import threading
 # Функции для работы с бд
 from def_for_work_date_base import is_user, show_db, del_user_db, add_user_db, update_user_db, get_user_name, show_table
 
@@ -414,6 +415,10 @@ async def show_password_mail(callback_query: types.CallbackQuery):
 async def echo(massage: types.Message):
     await bot.send_message(massage.from_user.id, massage.text)
 
+def start():
+    executor.start_polling(dp, skip_updates=True)
+    threading.Timer(86400, start).start()
+    
 
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    start()

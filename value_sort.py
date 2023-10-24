@@ -138,6 +138,3 @@ def check_hours_month(argument):
         list_day_in_month_current = (
             create_list_date_hours(current_day=date_current, starting_point=start_current_month))
         return list_day_in_month_current
-
-
-check_hours_month(argument='last_list_hours')

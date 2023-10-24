@@ -4,7 +4,15 @@ from value_sort import days
 from config import invalid_link_to_post
 
 
-def date_formating(txt):
+def formating_noted(txt:str):
+    if txt in invalid_link_to_post:
+        return 'Нет'
+    else:
+        formating_txt = txt.replace('\n', ' ')
+        return formating_txt
+
+
+def date_formating(txt:str)-> str:
     """
     Преобразовывает доту из YY.MM.DD в YY-MM-DD
     :param txt:
@@ -60,7 +68,7 @@ def get_info_work_day(user):
                     'Item': row[6].replace('\n', ' '),
                     'Comment': row[8].replace('\n', ' '),
                     'Teacher': row[7].replace('\n', ' '),
-                    'Note': row[9].replace('\n', ' '),
+                    'Note':formating_noted(row[9]),
                     'Audience': row[10].replace('\n', ' '),
                     'Webinar link': row[11].replace('\n', ' '),
                     'Link to post': row[12].replace('\n', ' '),
@@ -84,8 +92,8 @@ def read_js(work_day, argument, day_read=1):
         date_json = work_day['Data']
         data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
         if data_sort == days(argument, day=day_read):
-            description_for_show_work_day = (f"🎓 Программа: {work_day['Programm']} \n\n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель: {work_day['Teacher']}\n🗓Дата: "
-                           f"{work_day['Data']}\n🕐Время: {work_day['Trowme']} \n📌Оператор: {work_day['Operator']}\n🔒Акаунт: {work_day['Account']}.")
+            description_for_show_work_day = (f"🎓 Программа: {work_day['Programm']} \n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель: {work_day['Teacher']}\n🗓Дата: "
+                           f"{work_day['Data']}\n🕐Время: {work_day['Trowme']}\n❗Примичание: {work_day['Note']}\n📌Оператор: {work_day['Operator']}\n🔒Акаунт: {work_day['Account']}.")
             return description_for_show_work_day
     else:
         pass
@@ -105,7 +113,7 @@ def read_js_day(work_day:dict, date_base_day:list):
         data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
         if data_sort in date_base_day:
             description = (f"🎓Программа: {work_day['Programm']} \n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель: {work_day['Teacher']}\n🗓Дата: "
-                           f"{work_day['Data']}\n🕐Время: {work_day['Trowme']} \n📌Оператор: {work_day['Operator']}\n🔒Акаунт: {work_day['Account']}.")
+                           f"{work_day['Data']}\n🕐Время: {work_day['Trowme']} \n❗Примичание: {work_day['Note']} \n📌Оператор: {work_day['Operator']}\n🔒Акаунт: {work_day['Account']}.")
             return description
     else:
         pass
