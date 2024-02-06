@@ -4,6 +4,8 @@ Makefile
 requirements.txt
 data_base.csv
 accounts.py
+report_date.txt
+report_parsing.txt
 
 #Папки
 /.idea

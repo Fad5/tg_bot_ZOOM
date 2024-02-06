@@ -1,8 +1,19 @@
-from datetime import date, datetime
-from datetime import timedelta
+from datetime import date, datetime, timedelta
+
+
+def cteate_file_report(data):
+    """
+    Добавления в файл report_date.txt отчет о обновления exel файла
+    """
+    with open('report_date.txt', 'a', encoding='utf-8') as f:
+        f.write(data)
 
 
 def start_weekday() -> date:
+    """
+    Функция которая возвращает дату текущего понидельника 
+    return: start_week - дата текущего понидельника
+    """
     current_day = date.today()
     week = current_day.weekday()
     start_week = current_day - timedelta(days=week)
@@ -10,12 +21,21 @@ def start_weekday() -> date:
 
 
 def week(argument: str = '') -> tuple[date, date]:
+    """
+
+    """
     if argument == 'next':
-        finish_week = start_weekday() + timedelta(days=13)
+        current_day = date.today()
+        week = current_day.weekday()
+        start_week = current_day - timedelta(days=week)
+        finish_week = start_week + timedelta(days=13)
         start_week = start_weekday() + timedelta(days=7)
         return start_week, finish_week
     elif argument == 'last':
-        finish_week = start_weekday() - timedelta(days=1)
+        current_day = date.today()
+        week = current_day.weekday()
+        start_week = current_day - timedelta(days=week)
+        finish_week = start_week - timedelta(days=1)
         start_week = start_weekday() - timedelta(days=7)
         return start_week, finish_week
     else:
@@ -27,6 +47,22 @@ def week(argument: str = '') -> tuple[date, date]:
 
 
 def days(optional: str, day: int = 1, current_day: date = date.today()) -> date:
+    """
+    
+    
+    """
+    cteate_file_report(f'{current_day} | {datetime.now()} \n')
+    if optional == 'next':
+        next_day = date.today() + timedelta(days=day)
+        return next_day
+    elif optional == 'last':
+        last_day = date.today() - timedelta(days=day)
+        return last_day
+    else:
+        return date.today()
+
+
+def days_for_week(optional: str, day: int = 1, current_day: date = date.today()) -> date:
     if optional == 'next':
         next_day = current_day + timedelta(days=day)
         return next_day
@@ -38,6 +74,8 @@ def days(optional: str, day: int = 1, current_day: date = date.today()) -> date:
 
 
 def get_password_mail(zoom_account: str, ACCOUNTS: dict) -> str:
+    """
+    """
     if zoom_account in ACCOUNTS:
         data_account = ACCOUNTS[zoom_account]
         resault = (f'📬 Почта: <code>{data_account["mail"]}</code> \n🔑Пароль: <code>{data_account["password"]}</code>')
@@ -48,6 +86,8 @@ def get_password_mail(zoom_account: str, ACCOUNTS: dict) -> str:
 
 
 def week_name(argument: str = '') -> str:
+    """
+    """
     start_week = week(argument)[0]
     finish_week = week(argument)[1]
     resault = f'{start_week.day}.{start_week.month} - {finish_week.day}.{finish_week.month}'
@@ -71,17 +111,25 @@ def list_work_day() -> list:
         start_week = data[0]
         list_day = []
         for i in range(0, 7):
-            number_day = days('next', current_day=start_week, day=i)
+            number_day = days_for_week('next', current_day=start_week, day=i)
             list_day.append(number_day)
         full_list_day.append(list_day)
     return full_list_day
 
 
-def zero_error(element: int):
-    if element == 0:
+
+
+
+def zero_error( number_of_the_month: int):
+    """
+    Функция для коректного отображения номер месяца
+    
+    - number_of_the_month - номер месяца 
+    """
+    if number_of_the_month == 0:
         return 12
-    if 13 > element >= 1:
-        return element
+    if 13 > number_of_the_month >= 1:
+        return number_of_the_month
     else:
         return None
 

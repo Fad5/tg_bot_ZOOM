@@ -1,17 +1,24 @@
-import datetime
-
-from aiogram import Bot, Dispatcher, types, executor
+from keybords_for_bot import get_kb_list_db, get_kb_start
+from aiogram import Bot, Dispatcher, types, executor, filters
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher import FSMContext
 from config import answer_block, TEXT_HOLIDAY, list_info
-from accounts import TOKEN, ACCOUNTS_ZOOM,ACCOUNTS_WEBINAR
+from accounts import TOKEN, ACCOUNTS_ZOOM, ACCOUNTS_WEBINAR
 from parsing import get_info_work_day, read_js, read_js_day, read_js_hours
 from sort_work_day import create_cvs_file
 from value_sort import get_password_mail, list_work_day, check_hours_month
-import threading
+
+# Функции для роботы с txt
+from Work_with_file import TxtHandler
+
 # Функции для работы с бд
 from def_for_work_date_base import is_user, show_db, del_user_db, add_user_db, update_user_db, get_user_name, show_table
 
+storge = MemoryStorage()
+
 bot = Bot(token=TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=storge)
 
 # Функиция которая забирает с сайта файл  сортирует и сохранияет в csv файл
 create_cvs_file()
@@ -20,13 +27,82 @@ kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 kb.add('Аккаунты zoom', 'Операторы Webinar.ru')
 
 
-# Команды для админа
+class StatesdataBase(StatesGroup):
+    dataBase = State()
+
+
+class StatesReplaceSelf(StatesGroup):
+    name = State()
+
+
+@dp.message_handler(commands='data')
+async def cmd_create(message: types.Message) -> None:
+    list_week = list_work_day()
+    result = 'LAST WEEK: ' + str(list_week[0]) + '\n' + 'CURENT WEEK: ' + str(
+        list_week[1]) + '\n' + 'NEXT WEEK: ' + str(list_week[2])
+    await bot.send_message(message.from_user.id, text=result)
+
+
+# /db_show - вызывает машину сотояний
+@dp.message_handler(commands='db_show')
+async def cmd_create(message: types.Message) -> None:
+    await message.answer("Напиши имя базы данных!",
+                         reply_markup=get_kb_list_db())
+
+    await StatesdataBase.dataBase.set()
+
+
+@dp.message_handler(filters.Text(contains=['отмена', 'Отмена'], ignore_case=True), state='*')
+async def cmd_cancel(message: types.Message, state: FSMContext):
+    """
+    Функция прерывает машину состояний 
+    """
+    await state.finish()
+    await message.reply('Вы прервали действие', reply_markup=get_kb_start())
+
+
+@dp.message_handler(filters.Text(contains=['Показать список DataBase',
+                                           'показать список database'], ignore_case=True), state='*')
+async def cmd_show_table(message: types.Message):
+    result = show_table()
+    await bot.send_message(message.from_user.id, text=result)
+
+
+@dp.message_handler(state=StatesdataBase.dataBase)
+async def load_description(message: types.Message, state: FSMContext) -> None:
+    async with state.proxy() as database:
+        database['dataBase'] = message.text
+    date_base = show_db(database=database['dataBase'].lower())
+    await bot.send_message(message.from_user.id, text=str(date_base), parse_mode='HTML')
+    await state.finish()
+
 
 @dp.message_handler(commands='list_db')
 async def list_db(massage: types.Message) -> None:
+    result = show_table()
+    await bot.send_message(massage.from_user.id, text=result)
 
-        result = show_table()
-        await bot.send_message(massage.from_user.id, text=result)
+
+@dp.message_handler(filters.Text(contains='Последнее обнлвление'))
+async def update_user(massage: types.Message) -> None:
+    data = TxtHandler.txt_read('report_parsing.txt')
+    await bot.send_message(massage.from_user.id, text=data[11:30])
+
+
+@dp.message_handler(commands='upd')
+async def update_user(message: types.Message) -> None:
+    await message.answer("Введите имя как в Excel!",
+                         reply_markup=get_kb_list_db())
+    await StatesReplaceSelf.name.set()
+
+
+@dp.message_handler(state=StatesReplaceSelf.name)
+async def load_description(message: types.Message, state: FSMContext) -> None:
+    async with state.proxy() as name:
+        name['dataBase'] = message.text
+        update_user_db('user_name', name['dataBase'].replace('==', ' '), 429845350, 'user')
+        await bot.send_message(message.from_user.id, text='Ок', reply_markup=get_kb_start())
+        await state.finish()
 
 
 @dp.message_handler(commands='update_user_db')
@@ -37,11 +113,10 @@ async def update_user(massage: types.Message) -> None:
     :param massage:
     :return: None
     """
-    is_id = is_user(massage.from_user.id,'admin')
+    is_id = is_user(massage.from_user.id, 'admin')
     if is_id == True:
         message = massage.text
         message_split = message.split()
-        print(message_split)
         if len(message_split) == 2:
             if message_split[1].lower() == 'info':
                 await bot.send_message(massage.from_user.id,
@@ -49,12 +124,12 @@ async def update_user(massage: types.Message) -> None:
                                             '\n Второй аргумент(новое значение): new name\n'
                                             'Третий аргумент: id_tg Четвертый аргумен: datebase\n'
                                             'Для просмотра баз данных введите команду /list_db')
-        elif len(message_split) == 5:    
+        elif len(message_split) == 5:
             value = message_split[1]
-            name_user = message_split[2].replace('__',' ')
+            name_user = message_split[2].replace('==', ' ')
             id_tg = int(message_split[3])
             datebase = message_split[4]
-            update_user_db(value, name_user, id_tg,datebase)
+            update_user_db(value, name_user, id_tg, datebase)
             await bot.send_message(massage.from_user.id, text='Ок')
         else:
             await bot.send_message(massage.from_user.id, text='Введите команду и id')
@@ -74,14 +149,14 @@ async def check_user(massage: types.Message) -> None:
         user_id = massage.text.split()
         if len(user_id) == 2:
             if user_id[1].lower() == 'info':
-                    await bot.send_message(massage.from_user.id,
-                                           text='Первый аргумент: id_TG \n'
+                await bot.send_message(massage.from_user.id,
+                                       text='Первый аргумент: id_TG \n'
                                             'Второй аргумент: datebase\n'
                                             'Пример: /check_user 123456 user')
         elif len(user_id) == 3:
             id_int = int(user_id[1])
             datebase = user_id[2]
-            result = is_user(id_tg=id_int,database=datebase)
+            result = is_user(id_tg=id_int, database=datebase)
             if result == True:
                 await bot.send_message(massage.from_user.id, text='Ок')
             else:
@@ -94,14 +169,14 @@ async def check_user(massage: types.Message) -> None:
         await bot.send_message(massage.from_user.id, text='🔒У вас нет доступа')
 
 
-@dp.message_handler(commands='db_show')
+@dp.message_handler(commands='db_show_')
 async def db_show(massage: types.Message) -> None:
     """
     Функция для получения всех данных с базы данных
     :param massage:
     :return:
     """
-    is_id = is_user(massage.from_user.id,'admin')
+    is_id = is_user(massage.from_user.id, 'admin')
     if is_id == True:
         message = massage.text
         message_split = message.split()
@@ -109,8 +184,8 @@ async def db_show(massage: types.Message) -> None:
             if message_split[1].lower() == 'info':
                 await bot.send_message(massage.from_user.id, text='Пример:/db_show datebase')
             else:
-                    date_base = show_db(database=message_split[1].lower())
-                    await bot.send_message(massage.from_user.id, text=str(date_base),parse_mode='HTML')
+                date_base = show_db(database=message_split[1].lower())
+                await bot.send_message(massage.from_user.id, text=str(date_base), parse_mode='HTML')
     else:
         await bot.send_message(massage.from_user.id, text='🔒У вас нет доступа')
 
@@ -125,14 +200,15 @@ async def del_user(massage: types.Message) -> None:
     message_split = massage.text.split()
     if len(message_split) == 2:
         if message_split[1].lower() == 'info':
-            await bot.send_message(massage.from_user.id, text='Введите команду, id, и datebase к которому подключатся \n Пример:'
-                         '/del_user_db 123456 user')
+            await bot.send_message(massage.from_user.id,
+                                   text='Введите команду, id, и datebase к которому подключатся \n Пример:'
+                                        '/del_user_db 123456 user')
     elif len(message_split) == 3:
-        datebase =  message_split[2]
+        datebase = message_split[2]
         id_tg = int(message_split[1])
-        result = is_user(id_tg,datebase)
+        result = is_user(id_tg, datebase)
         if result == True:
-            del_user_db(id_tg,datebase)
+            del_user_db(id_tg, datebase)
             await bot.send_message(massage.from_user.id, text='❗Пользователь с таким id удален из базы данных!')
         else:
             await bot.send_message(massage.from_user.id, text='❗Пользователь с таким id не найден!')
@@ -145,10 +221,10 @@ async def check_user(massage: types.Message):
     result = is_user(id_tg=massage.from_user.id, database='admin')
     if result == True:
         await bot.send_message(massage.from_user.id, text='/add_user_db - добавить пользователя \n'
-                                                      '/del_user_db - удалить пользователя \n'
-                                                      '/db_show - показать базу данных \n'
-                                                      '/check_user - проверка в базе данных\n'
-                                                      '/list_db - список datebase')
+                                                          '/del_user_db - удалить пользователя \n'
+                                                          '/db_show - показать базу данных \n'
+                                                          '/check_user - проверка в базе данных\n'
+                                                          '/list_db - список datebase')
     else:
         await bot.send_message(massage.from_user.id, text='🔒У вас нет доступа')
 
@@ -168,13 +244,13 @@ async def add_user(massage: types.Message) -> None:
         if len(message_split) == 2:
             if message_split[1].lower() == 'info':
                 await bot.send_message(massage.from_user.id,
-                                      text='Введите команду, id, и datebase к которому подключатся \n Пример: '
-                                      '/add_user_db 123456 Имя__Фамилия в exel user')
+                                       text='Введите команду, id, и datebase к которому подключатся \n Пример: '
+                                            '/add_user_db 123456 Имя==Фамилия в exel user')
         elif len(message_split) == 4:
             id_tg = int(message_split[1])
-            name_user = message_split[2].replace('__',' ')
+            name_user = message_split[2].replace('==', ' ')
             datebase = message_split[3]
-            result = add_user_db(id_tg, name_user,datebase)
+            result = add_user_db(id_tg, name_user, datebase)
             if result == True:
                 await bot.send_message(massage.from_user.id, text='Ок')
             else:
@@ -202,10 +278,9 @@ def get_keyboard(name_callback, ACCOUNTS):
 
 @dp.message_handler(commands='start')
 async def start_handler(massage: types.Message):
-    print(massage.from_user.id)
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
-        await massage.answer(f'👋 Привет,{massage.from_user.first_name}!', reply_markup=kb)
+        await massage.answer(f'👋 Привет,{massage.from_user.first_name}!', reply_markup=get_kb_start())
     else:
         await bot.send_message(massage.from_user.id, text=answer_block)
 
@@ -248,7 +323,7 @@ async def get_last_week_work(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
-            info = read_js_day(i,list_work_day()[0])
+            info = read_js_day(i, list_work_day()[0])
             if info != None:
                 list_info.append(info)
                 await massage.answer(info)
@@ -318,67 +393,67 @@ async def get_yesterday_work_day(massage: types.Message) -> None:
 
 
 @dp.message_handler(commands=f'get_summa_hours_current_month')
-async def get_hours_summa_current(massage: types.Message, summa: int = 0, print_hours: str = '') -> None:
+async def get_hours_summa_current(massage: types.Message, summa: float = 0) -> None:
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
+        date_list = check_hours_month('current_list_hours')
         for i in (get_info_work_day(result)):
-            hours = read_js_hours(i, check_hours_month('current_list_hours'))
+            hours = read_js_hours(i, date_list)
             if hours == None:
                 pass
             else:
-                summa = summa + hours[0]
-                print_hours = print_hours + hours[1]
-        await bot.send_message(massage.from_user.id, text='🕰 '+str(summa))
+                summa = summa + float(hours[0])
+        await bot.send_message(massage.from_user.id, text='🕰 ' + str("%.2f" % summa))
     else:
-       await bot.send_message(massage.from_user.id, text=answer_block)
+        await bot.send_message(massage.from_user.id, text=answer_block)
 
 
 @dp.message_handler(commands=f'get_list_hours_current_month')
-async def get_hours_list_current(massage: types.Message, summa: int = 0, print_hours: str = '') -> None:
+async def get_hours_list_current(massage: types.Message, print_hours: str = '') -> None:
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
+        date_list = check_hours_month('current_list_hours')
         for i in (get_info_work_day(result)):
-            hours = read_js_hours(i, check_hours_month('current_list_hours'))
+            hours = read_js_hours(i, date_list)
             if hours == None:
                 pass
             else:
-                summa = summa + hours[0]
                 print_hours = print_hours + hours[1]
         await bot.send_message(massage.from_user.id, text=print_hours)
     else:
-       await bot.send_message(massage.from_user.id, text=answer_block)
+        await bot.send_message(massage.from_user.id, text=answer_block)
 
 
 @dp.message_handler(commands=f'get_summa_hours_last_month')
-async def get_hours_summa_last(massage: types.Message, summa: int = 0, print_hours: str = '') -> None:
+async def get_hours_summa_last(massage: types.Message, summa: float = 0, print_hours: str = '') -> None:
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
+        date_list = check_hours_month('last_list_hours')
         for i in (get_info_work_day(result)):
-            hours = read_js_hours(i, check_hours_month('last_list_hours'))
+            hours = read_js_hours(i, date_list)
             if hours == None:
                 pass
             else:
-                summa = summa + hours[0]
-                print_hours = print_hours + hours[1]
-        await bot.send_message(massage.from_user.id, text='🕰 '+str(summa))
+                summa = summa + float(hours[0])
+        await bot.send_message(massage.from_user.id, text='🕰 ' + str("%.2f" % summa))
     else:
-       await bot.send_message(massage.from_user.id, text=answer_block)
+        await bot.send_message(massage.from_user.id, text=answer_block)
 
 
 @dp.message_handler(commands=f'get_list_hours_last_month')
 async def get_hours_list_last(massage: types.Message, summa: int = 0, print_hours: str = '') -> None:
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
+        date_list = check_hours_month('last_list_hours')
         for i in (get_info_work_day(result)):
-            hours = read_js_hours(i, check_hours_month('last_list_hours'))
+            hours = read_js_hours(i, date_list)
             if hours == None:
                 pass
             else:
-                summa = summa + hours[0]
                 print_hours = print_hours + hours[1]
         await bot.send_message(massage.from_user.id, text=print_hours)
     else:
-       await bot.send_message(massage.from_user.id, text=answer_block)
+        await bot.send_message(massage.from_user.id, text=answer_block)
 
 
 @dp.message_handler()
@@ -392,7 +467,7 @@ async def get_info_accounts(massage: types.Message):
             await bot.send_message(massage.from_user.id, '<b>Операторы Webinar.ru</b>', parse_mode='HTML',
                                    reply_markup=get_keyboard('webinar', ACCOUNTS_WEBINAR))
     else:
-       await bot.send_message(massage.from_user.id, text=answer_block)
+        await bot.send_message(massage.from_user.id, text=answer_block)
 
 
 @dp.callback_query_handler(text_contains='ZOOM')
@@ -415,10 +490,6 @@ async def show_password_mail(callback_query: types.CallbackQuery):
 async def echo(massage: types.Message):
     await bot.send_message(massage.from_user.id, massage.text)
 
-def start():
-    executor.start_polling(dp, skip_updates=True)
-    threading.Timer(86400, start).start()
-    
 
 if __name__ == '__main__':
-    start()
+    executor.start_polling(dp, skip_updates=True)
