@@ -1,4 +1,4 @@
-from value_sort import name_week_button, list_work_day, check_hours_month
+from value_sort import  list_work_day, check_hours_month
 
 invalid_link_to_post = 'http://content.inpsycho.ru/'
 

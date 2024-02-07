@@ -1,9 +1,12 @@
 from datetime import date, datetime, timedelta
+from typing import List, Dict
 
 
-def cteate_file_report(data):
+def cteate_file_report(data) -> None:
     """
     Добавления в файл report_date.txt отчет о обновления exel файла
+
+    return: None
     """
     with open('report_date.txt', 'a', encoding='utf-8') as f:
         f.write(data)
@@ -11,7 +14,8 @@ def cteate_file_report(data):
 
 def start_weekday() -> date:
     """
-    Функция которая возвращает дату текущего понидельника 
+    Функция которая возвращает дату текущего понидельника
+
     return: start_week - дата текущего понидельника
     """
     current_day = date.today()
@@ -20,61 +24,71 @@ def start_weekday() -> date:
     return start_week
 
 
-def week(argument: str = '') -> tuple[date, date]:
+def week(argument: str) -> tuple[date, date]:
     """
+    Функция возвращает начало и конец недели в зависимости от argument,
+    она работает с текущей, прошлой и будующей. Функйия плоучет начало этой недели
+    и уже либо прибовляет 7 дней или убавляет  для нахождения начало прошлой или будующей.
 
+    - argument - ключ слова для получения значения(next, last, current)
+
+    return: start_week, finish_week - (datetime.date(year, month, day), datetime.date(year, month, day))
     """
-    if argument == 'next':
-        current_day = date.today()
-        week = current_day.weekday()
-        start_week = current_day - timedelta(days=week)
-        finish_week = start_week + timedelta(days=13)
-        start_week = start_weekday() + timedelta(days=7)
-        return start_week, finish_week
-    elif argument == 'last':
-        current_day = date.today()
-        week = current_day.weekday()
-        start_week = current_day - timedelta(days=week)
-        finish_week = start_week - timedelta(days=1)
-        start_week = start_weekday() - timedelta(days=7)
-        return start_week, finish_week
-    else:
-        current_day = date.today()
-        week = current_day.weekday()
-        start_week = current_day - timedelta(days=week)
-        finish_week = start_weekday() + timedelta(days=6)
-        return start_week, finish_week
+    data_kay = {'next':[13,7],'last':[1,7],'current':[0,6]}
+    current_day = date.today()
+    week = current_day.weekday()
+    start_week = current_day - timedelta(days=week)
+    finish_week = start_week + timedelta(days=data_kay[argument][0])
+    start_week = start_weekday() + timedelta(days=data_kay[argument][1])
+    return start_week, finish_week
 
 
-def days(optional: str, day: int = 1, current_day: date = date.today()) -> date:
+
+def days(argument: str, day: int = 1, current_day: date = date.today()) -> date:
     """
-    
-    
+    Функция для получния даты текущего, прошлого и будующего дня в формате 
+    datetime.date в зависимости от argument
+
+    - argument - (next,last, ) - получени дня в зависимости от того что написано 
+
+    return: datetime.date 
     """
     cteate_file_report(f'{current_day} | {datetime.now()} \n')
-    if optional == 'next':
+    if argument == 'next':
         next_day = date.today() + timedelta(days=day)
         return next_day
-    elif optional == 'last':
+    elif argument == 'last':
         last_day = date.today() - timedelta(days=day)
         return last_day
     else:
         return date.today()
 
 
-def days_for_week(optional: str, day: int = 1, current_day: date = date.today()) -> date:
-    if optional == 'next':
+def days_for_week(argument: str, day: int = 1, current_day: date = date.today()) -> date:
+    """
+    Получение текущего, прошлого и будующего дня в формате datetime,
+    в зависимости от argument
+
+    return: день в формате datetime ()
+    """
+    if argument == 'next':
         next_day = current_day + timedelta(days=day)
         return next_day
-    elif optional == 'last':
+    elif argument == 'last':
         last_day = current_day - timedelta(days=day)
         return last_day
     else:
         return current_day
 
 
-def get_password_mail(zoom_account: str, ACCOUNTS: dict) -> str:
+def get_password_mail(zoom_account: str, ACCOUNTS: Dict) -> str:
     """
+    Получаем данные об аккаунте 
+
+    - zoom_account - name в файле accounts_exemple.py
+    - ACCOUNTS -  словари(ACCOUNTS_WEBINAR, ACCOUNTS_ZOOM) в файле accounts_exemple.py
+
+    return result: Данные об аккаунте 
     """
     if zoom_account in ACCOUNTS:
         data_account = ACCOUNTS[zoom_account]
@@ -85,27 +99,17 @@ def get_password_mail(zoom_account: str, ACCOUNTS: dict) -> str:
         return resault
 
 
-def week_name(argument: str = '') -> str:
+def list_work_day() -> List:
     """
+    Функция создает список в который будут входить 3 спика состоящие из 
+    дней недели текущей, будующей и прошлой
+
+    return: список спиок дней текущей, будующей и прошлой недели
+      [[last_week_days],[current_week_days],[next_week_days]]
     """
-    start_week = week(argument)[0]
-    finish_week = week(argument)[1]
-    resault = f'{start_week.day}.{start_week.month} - {finish_week.day}.{finish_week.month}'
-    return resault
 
-
-def name_week_button() -> list:
-    arguments = ['last', '', 'next']
-    list_week_date = []
-    for argument_week in arguments:
-        result = week_name(argument_week)
-        list_week_date.append(result)
-    return list_week_date
-
-
-def list_work_day() -> list:
     full_list_day = []
-    arguments = ['last', '', 'next']
+    arguments = ['last', 'current', 'next']
     for argument in arguments:
         data = week(argument)
         start_week = data[0]
@@ -117,13 +121,10 @@ def list_work_day() -> list:
     return full_list_day
 
 
-
-
-
-def zero_error( number_of_the_month: int):
+def zero_error( number_of_the_month: int) -> int|None:
     """
     Функция для коректного отображения номер месяца
-    
+
     - number_of_the_month - номер месяца 
     """
     if number_of_the_month == 0:
@@ -134,7 +135,13 @@ def zero_error( number_of_the_month: int):
         return None
 
 
-def create_list_date_hours(current_day: date, starting_point: date):
+def create_list_date_hours(current_day: date, starting_point: date) :
+    """
+    Функция проходится циклом и от current_day(текущего дня) отнимается 1 день,
+    до тех пор пока current_day == starting_point 
+
+    return list_date: Получение дней с 10 по 10
+    """
     list_date = []
     if current_day > starting_point:
         while current_day > starting_point:
@@ -149,9 +156,16 @@ def create_list_date_hours(current_day: date, starting_point: date):
 
 
 def check_hours():
+    """
+    Получение дней с 10 по 10
+    """
+    #Получаем текущую дату 
     date_current = date.today()
+    #Переобразовываем в str date_current
     date_current_str = str(date_current)
+    # Получаем year-month-10
     check_10 = date_current_str[:8] + '10'
+    #Переводим в check_10 в datetime
     check_10_check = datetime.strptime(check_10, '%Y-%m-%d').date()
     if date_current > check_10_check:
         list_date_hours = (create_list_date_hours(current_day=date_current, starting_point=check_10_check))
@@ -163,26 +177,47 @@ def check_hours():
         check_10_check11 = datetime.strptime(check_10_check_1, '%Y-%m-%d').date()
         list_date_hours = (create_list_date_hours(current_day=date_current, starting_point=check_10_check11))
         return list_date_hours
+    
+check_hours()
+def check_hours_month(argument:str):
+    """
+    Функция возвращает все дни в формате datetime.date
 
-
-def check_hours_month(argument):
+    - argument - 2 ключа: last_list_hours - список прошлого месяца,
+        current_list_hours - список текущего месяца
+    """
     if argument == 'last_list_hours':
+        #Получаем текущую дату
         date_current = date.today()
+        #Забираем только день
         day_in = date.today().day
+        # Вычитаем 1 для получения начало текущего месяца 
         day_in_day = day_in - 1
-        finish_seathe = date_current - timedelta(days=day_in_day + 1)
-        finish_month = finish_seathe.month
-        finish_year = finish_seathe.year
+        #Получаем конец прошлого месяца 
+        finish_date = date_current - timedelta(days=day_in_day + 1)
+        #Получаем месяц
+        finish_month = finish_date.month
+        #Получаем год
+        finish_year = finish_date.year
+        # Создаем дату начало прощлого месяца
         get_last_month = f'{str(finish_year)}-{str(finish_month)}-01'
+        # Из str в datetime.date переводим
         finish_datetime = datetime.strptime(get_last_month, '%Y-%m-%d').date()
+        #Получаем начало текущего месяца 
         start_current_month = date_current - timedelta(days=day_in_day)
+        # Получаем в списке все дни прошлого месяца в формате [datetime.date(year, month, day), datetime.date(year, month, day)]
         list_day_in_month_last = create_list_date_hours(current_day=start_current_month, starting_point=finish_datetime)
         return list_day_in_month_last
     if argument == 'current_list_hours':
+         #Получаем текущую дату
         date_current = date.today()
+        #Забираем только день
         day_in = date.today().day
+        #Вычитаем 1 для получения начало текущего месяца 
         day_in = day_in - 1
+        #Получаем начало текущего месяца 
         start_current_month = date_current - timedelta(days=day_in)
+        #Получаем в списке все дни текущего месяца в формате [datetime.date(year, month, day), datetime.date(year, month, day)]
         list_day_in_month_current = (
             create_list_date_hours(current_day=date_current, starting_point=start_current_month))
         return list_day_in_month_current

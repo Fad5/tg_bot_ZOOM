@@ -20,6 +20,7 @@ class TxtHandler:
             data = file.read()
             return data
         
+        
     @staticmethod
     def txt_write(data: str, path:str, encoding:str = 'utf-8') -> None:
         """
@@ -32,6 +33,7 @@ class TxtHandler:
         """
         with open(path,'w', encoding=encoding) as file:
             file.write(data)
+
 
     @staticmethod
     def txt_add(data: str,path:str, encoding:str = 'utf-8') -> None:

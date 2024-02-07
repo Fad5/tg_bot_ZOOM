@@ -23,6 +23,7 @@ dp = Dispatcher(bot, storage=storge)
 # Функиция которая забирает с сайта файл  сортирует и сохранияет в csv файл
 create_cvs_file()
 
+#Клавиатура 
 kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 kb.add('Аккаунты zoom', 'Операторы Webinar.ru')
 
@@ -37,6 +38,9 @@ class StatesReplaceSelf(StatesGroup):
 
 @dp.message_handler(commands='data')
 async def cmd_create(message: types.Message) -> None:
+    """
+    Функция отпраляет список из  LAST,NEXT и CURENT недель для проверки
+    """
     list_week = list_work_day()
     result = 'LAST WEEK: ' + str(list_week[0]) + '\n' + 'CURENT WEEK: ' + str(
         list_week[1]) + '\n' + 'NEXT WEEK: ' + str(list_week[2])
@@ -70,6 +74,9 @@ async def cmd_show_table(message: types.Message):
 
 @dp.message_handler(state=StatesdataBase.dataBase)
 async def load_description(message: types.Message, state: FSMContext) -> None:
+    """
+
+    """
     async with state.proxy() as database:
         database['dataBase'] = message.text
     date_base = show_db(database=database['dataBase'].lower())
@@ -85,6 +92,10 @@ async def list_db(massage: types.Message) -> None:
 
 @dp.message_handler(filters.Text(contains='Последнее обнлвление'))
 async def update_user(massage: types.Message) -> None:
+    """
+    Функция читает report_parsing.txt и отправляет последние значение,
+    последнее обновление файла data_base.csv
+    """
     data = TxtHandler.txt_read('report_parsing.txt')
     await bot.send_message(massage.from_user.id, text=data[11:30])
 
@@ -218,6 +229,9 @@ async def del_user(massage: types.Message) -> None:
 
 @dp.message_handler(commands='admin_commands')
 async def check_user(massage: types.Message):
+    """
+    Отправляет все возможные команды для администраторов
+    """
     result = is_user(id_tg=massage.from_user.id, database='admin')
     if result == True:
         await bot.send_message(massage.from_user.id, text='/add_user_db - добавить пользователя \n'
@@ -261,7 +275,7 @@ async def add_user(massage: types.Message) -> None:
         await bot.send_message(massage.from_user.id, text='🔒У вас нет доступа')
 
 
-# Команды для пользователей
+
 # Меню с аккаунтами zoom
 def get_keyboard(name_callback, ACCOUNTS):
     callback_data_zoom = []
@@ -276,6 +290,7 @@ def get_keyboard(name_callback, ACCOUNTS):
     return keyboard
 
 
+#/start - функция запуска бота 
 @dp.message_handler(commands='start')
 async def start_handler(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
@@ -285,6 +300,8 @@ async def start_handler(massage: types.Message):
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+# /next_week - функция сначала смотри есть ли вы в базе данных, а потом проходится 
+# по data_base.csv файлу и возвращяют все зумы
 @dp.message_handler(commands='next_week')
 async def get_next_week_work(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
@@ -302,6 +319,8 @@ async def get_next_week_work(massage: types.Message):
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+# /current_week - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
+# по data_base.csv файлу и возвращяют все зумы
 @dp.message_handler(commands='current_week')
 async def get_current_week_work(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
@@ -318,6 +337,8 @@ async def get_current_week_work(massage: types.Message):
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+# /last_week - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
+# по data_base.csv файлу и возвращяют все зумы
 @dp.message_handler(commands='last_week')
 async def get_last_week_work(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
@@ -333,9 +354,15 @@ async def get_last_week_work(massage: types.Message):
     else:
         await bot.send_message(massage.from_user.id, text=answer_block)
 
-
+# /today - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
+# по data_base.csv файлу и возвращяют все зумы в этот день
 @dp.message_handler(commands='today')
 async def get_today_work_day(massage: types.Message):
+    """
+    Получает трансляций на сегодня
+    :param massage:
+    :return:
+    """
     result = get_user_name(massage.from_user.id, 'user')
     if result != None:
         for i in (get_info_work_day(result)):
@@ -350,10 +377,12 @@ async def get_today_work_day(massage: types.Message):
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+# /tomorrow - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
+# по data_base.csv файлу и возвращяют все зумы в этот день
 @dp.message_handler(commands='tomorrow')
 async def get_tomorrow_work_day(massage: types.Message) -> None:
     """
-    Полученеи трансляций на завтра
+    Получает трансляций на завтра
     :param massage:
     :return:
     """
@@ -371,6 +400,8 @@ async def get_tomorrow_work_day(massage: types.Message) -> None:
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+# /yesterday - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
+# по data_base.csv файлу и возвращяют все зумы в этот день
 @dp.message_handler(commands='yesterday')
 async def get_yesterday_work_day(massage: types.Message) -> None:
     """ 
@@ -392,6 +423,8 @@ async def get_yesterday_work_day(massage: types.Message) -> None:
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+# /get_summa_hours_current_month - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
+# по data_base.csv файлу и возвращяет сумму часов в текущем месяце
 @dp.message_handler(commands=f'get_summa_hours_current_month')
 async def get_hours_summa_current(massage: types.Message, summa: float = 0) -> None:
     result = get_user_name(massage.from_user.id, 'user')
@@ -408,6 +441,8 @@ async def get_hours_summa_current(massage: types.Message, summa: float = 0) -> N
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+# /get_list_hours_current_month - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
+# по data_base.csv файлу и возвращяет список часов в текущем месяце
 @dp.message_handler(commands=f'get_list_hours_current_month')
 async def get_hours_list_current(massage: types.Message, print_hours: str = '') -> None:
     result = get_user_name(massage.from_user.id, 'user')
@@ -424,6 +459,8 @@ async def get_hours_list_current(massage: types.Message, print_hours: str = '') 
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+# /get_summa_hours_last_month - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
+# по data_base.csv файлу и возвращяет сумму  часов в прошлом месяце
 @dp.message_handler(commands=f'get_summa_hours_last_month')
 async def get_hours_summa_last(massage: types.Message, summa: float = 0, print_hours: str = '') -> None:
     result = get_user_name(massage.from_user.id, 'user')
@@ -440,6 +477,8 @@ async def get_hours_summa_last(massage: types.Message, summa: float = 0, print_h
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+# /get_list_hours_last_month - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
+# по data_base.csv файлу и возвращяет список часов в прошлом месяце
 @dp.message_handler(commands=f'get_list_hours_last_month')
 async def get_hours_list_last(massage: types.Message, summa: int = 0, print_hours: str = '') -> None:
     result = get_user_name(massage.from_user.id, 'user')
@@ -456,6 +495,7 @@ async def get_hours_list_last(massage: types.Message, summa: int = 0, print_hour
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+# 
 @dp.message_handler()
 async def get_info_accounts(massage: types.Message):
     result = get_user_name(massage.from_user.id, 'user')
@@ -470,6 +510,7 @@ async def get_info_accounts(massage: types.Message):
         await bot.send_message(massage.from_user.id, text=answer_block)
 
 
+#
 @dp.callback_query_handler(text_contains='ZOOM')
 async def show_password_mail(callback_query: types.CallbackQuery):
     button_name = callback_query['data'].replace('ZOOM', '')
@@ -478,6 +519,7 @@ async def show_password_mail(callback_query: types.CallbackQuery):
     await callback_query.answer()
 
 
+#
 @dp.callback_query_handler(text_contains='webinar')
 async def show_password_mail(callback_query: types.CallbackQuery):
     button_name = callback_query['data'].replace('webinar', '')
@@ -486,6 +528,7 @@ async def show_password_mail(callback_query: types.CallbackQuery):
     await callback_query.answer()
 
 
+# Эхо
 @dp.message_handler()
 async def echo(massage: types.Message):
     await bot.send_message(massage.from_user.id, massage.text)
