@@ -1,13 +1,13 @@
 import csv
 import datetime
-from value_sort import days, check_hours_month
+from value_sort import days
 from config import invalid_link_to_post
-from typing import Dict
+from typing import Any
 
 
-def formating_noted(txt: str) -> str:
+def formatting_noted(txt: str) -> str:
     """
-    Функция которая отображет заметки 
+    Функция, которая отображать заметки
 
     - txt - заметка 
     return: txt - отформатированная заметка 
@@ -15,14 +15,14 @@ def formating_noted(txt: str) -> str:
     if txt in invalid_link_to_post:
         return 'Нет'
     else:
-        formating_txt = txt.replace('\n', ' ')
-        return formating_txt
+        formatting_txt = txt.replace('\n', ' ')
+        return formatting_txt
 
 
-def date_formating(txt: str) -> str:
+def date_formatting(txt: str) -> str:
     """
     Преобразовывает доту из YY.MM.DD в YY-MM-DD, 
-    если строкка пуста, то пропускаем 
+    если строка пуста, то пропускаем
     :param txt:
     :return:
     """
@@ -36,32 +36,32 @@ def date_formating(txt: str) -> str:
         return ''
 
 
-def from_watch_in_hours(element: str) -> float:
+def from_watch_in_hours(element: str) -> float | None:
     """
-    Функция принимает переменную (XX.XX-XX.XX) типа str, обрабатываем значение(меняем . на :, меняем , на .), 
-    разделяет методом split по знаку "-", (XX:XX,XX:XX), получаем сумму минут от преого и второго значнеие, 
-    находм разницу и взовращаем это значение
+    Функция принимает переменную (XX.XX-XX.XX) типа str, обрабатываем значение(меняем '.' на ':', меняем ',' на '.'),
+    разделяет методом split по знаку "-", (XX:XX, XX:XX), получаем сумму минут от первого и второго значнеие,
+    находим разницу и возвращаем это значение
     """
     if element == '':
         return None
     else:
-        element = str(element).replace(' ','')
-        formating_element = (element.replace('.', ':').replace('.', ':').replace(' ', '').replace(',', '.')).replace(
+        element = str(element).replace(' ', '')
+        formatting_element = (element.replace('.', ':').replace('.', ':')
+                              .replace(' ', '').replace(',', '.')).replace(
             '—', '-').replace('–', '-').replace("−", '-')
-        formating_elements = formating_element.replace('.', ':').split('-')
-        firts_time = formating_elements[0].find(':')
-        second_time = formating_elements[1].find(':')
-        start_time = int(formating_elements[0][:firts_time]) * 60 + int(formating_elements[0][firts_time + 1:])
-        finish_time = int(formating_elements[1][:second_time]) * 60 + int(formating_elements[1][second_time + 1:])
+        formatting_elements = formatting_element.replace('.', ':').split('-')
+        fist_time = formatting_elements[0].find(':')
+        second_time = formatting_elements[1].find(':')
+        start_time = int(formatting_elements[0][:fist_time]) * 60 + int(formatting_elements[0][fist_time + 1:])
+        finish_time = int(formatting_elements[1][:second_time]) * 60 + int(formatting_elements[1][second_time + 1:])
         summa_hours = finish_time - start_time
-        resault = float(summa_hours / 60)
+        result = float(summa_hours / 60)
+        return result
 
-        return resault
 
-
-def get_info_work_day(user) -> Dict:
+def get_info_work_day(user) -> list[dict[str | Any, str | Any]]:
     """
-    Функция которя получает имя пользователя и потом проходиься по
+    Функция, которая получает имя пользователя и потом проходиься по
     csv файлу и помещает в js файл
     :param user: как записан в exel файле 
     :return:
@@ -76,15 +76,15 @@ def get_info_work_day(user) -> Dict:
                 if user_name in row:
                     js.append({
                         '#': row[0].replace('\n', ' '),
-                        'Programm': row[1].replace('\n', ' '),
+                        'Program': row[1].replace('\n', ' '),
                         'Modul': row[2].replace('\n', ' '),
-                        'Data': date_formating(row[3]),
-                        'Trowme': row[4].replace(' ', '').replace('.', ':'),
+                        'Data': date_formatting(row[3]),
+                        'Time': row[4].replace(' ', '').replace('.', ':'),
                         'Watch': row[5].replace('\n', ' '),
                         'Item': row[6].replace('\n', ' '),
                         'Comment': row[8].replace('\n', ' '),
                         'Teacher': row[7].replace('\n', ' '),
-                        'Note': formating_noted(row[9]),
+                        'Note': formatting_noted(row[9]),
                         'Audience': row[10].replace('\n', ' '),
                         'Webinar link': row[11].replace('\n', ' '),
                         'Link to post': row[12].replace('\n', ' '),
@@ -94,11 +94,11 @@ def get_info_work_day(user) -> Dict:
                     })
     return js
 
-get_info_work_day('Андрей А')
-def read_js(work_day, argument, day_read=1) -> str:
+
+def read_js(work_day, argument, day_read=1):
     """
-    Функция проходится по файлу csv и получет дату, если дата совпадает с заданой в argument,
-    то мы получем этот элемент преобразовываем и помещаем в переменную discription и возвращаем
+    Функция проходится по файлу csv и получит дату, если дата совпадает с заданной в argument,
+    то мы получим этот элемент преобразовываем и помещаем в переменную description и возвращаем
     :param work_day:
     :param argument:
     :param day_read:
@@ -109,17 +109,19 @@ def read_js(work_day, argument, day_read=1) -> str:
         data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
         if data_sort == days(argument, day=day_read):
             description_for_show_work_day = (
-                f"🎓 Программа: {work_day['Programm']} \n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель: {work_day['Teacher']}\n🗓Дата: "
-                f"{work_day['Data']}\n🕐Время: {work_day['Trowme']}\n❗Примичание: {work_day['Note']}\n📌Оператор: {work_day['Operator']}\n🔒Акаунт: {work_day['Account']}.")
+                f"🎓 Программа: {work_day['Program']} \n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель:"
+                f" {work_day['Teacher']}\n🗓Дата: "
+                f"{work_day['Data']}\n🕐Время: {work_day['Time']}\n❗Примечание: {work_day['Note']}\n📌Оператор:"
+                f" {work_day['Operator']}\n🔒Аккаунт: {work_day['Account']}.")
             return description_for_show_work_day
     else:
         pass
 
 
-def read_js_day(work_day: dict, date_base_day: list) -> str:
+def read_js_day(work_day: dict, date_base_day: list):
     """
-    Функция проходится по файлу csv и получет дату, если дата совпадает с заданой в work_day и есть в date_base_day,
-    то мы получем этот элемент преобразовываем и помещаем в переменную discription и возвращаем
+    Функция проходится по файлу csv и получит дату, если дата совпадает с заданной в work_day и есть в date_base_day,
+    то мы получим этот элемент преобразовываем и помещаем в переменную discription и возвращаем
     :param work_day:
     :param date_base_day:
     :return:
@@ -129,17 +131,19 @@ def read_js_day(work_day: dict, date_base_day: list) -> str:
         data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
         if data_sort in date_base_day:
             description = (
-                f"🎓Программа: {work_day['Programm']} \n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель: {work_day['Teacher']}\n🗓Дата: "
-                f"{work_day['Data']}\n🕐Время: {work_day['Trowme']} \n❗Примичание: {work_day['Note']} \n📌Оператор: {work_day['Operator']}\n🔒Акаунт: {work_day['Account']}.")
+                f"🎓Программа: {work_day['Program']} \n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель:"
+                f" {work_day['Teacher']}\n🗓Дата: "
+                f"{work_day['Data']}\n🕐Время: {work_day['Time']} \n❗Примечание: {work_day['Note']} "
+                f"\n📌Оператор: {work_day['Operator']}\n🔒Аккаунт: {work_day['Account']}.")
             return description
     else:
         pass
 
 
-def read_js_hours(work_day: dict, date_base_day: list) -> str:
+def read_js_hours(work_day: dict, date_base_day: list):
     """
-    Функция проходится по файлу csv и получет дату, если дата совпадает с заданой в work_day и есть в date_base_day,
-    то мы получем этот элемент преобразовываем и помещаем в переменную discription и возвращаем
+    Функция проходится по файлу csv и получает дату, если дата совпадает с заданной в work_day и есть в date_base_day,
+    то мы получим этот элемент преобразовываем и помещаем в переменную discription и возвращаем
     :param work_day:
     :param date_base_day:
     :return:
@@ -149,7 +153,7 @@ def read_js_hours(work_day: dict, date_base_day: list) -> str:
         data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
         if data_sort in date_base_day:
             if work_day['Link to post'][:27] == invalid_link_to_post:
-                if work_day['Hours'] != None:
+                if work_day['Hours'] is not None:
                     hours = work_day['Hours']
                     print_hours_day = f'🗓 {work_day["Data"]}    🕰 {str("%.2f" % work_day["Hours"])}\n'
                     return hours, print_hours_day
@@ -157,4 +161,3 @@ def read_js_hours(work_day: dict, date_base_day: list) -> str:
                 pass
     else:
         pass
-

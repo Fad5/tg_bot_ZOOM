@@ -6,15 +6,16 @@ file_db = 'server.db'
 def add_user_db(id_tg: int, name_user: str, table: str = 'user'):
     """
     Добавление пользователя в базу данных
-    :param id_tg:
-    :param name_user:
-    :return:
+    :param table: название таблицы в которую будем вносить изменения
+    :param id_tg: id telegram аккаунта
+    :param name_user: имя в exel таблице
+    :return: None
     """
     result = is_user(id_tg=id_tg, table=table)
-    if result == False:
+    if not result:
         db = sqlite3.connect(file_db)
         sql = db.cursor()
-        sql_add = (f"""INSERT INTO {table}(id_TG,user_name) VALUES (?,?)""")
+        sql_add = f"""INSERT INTO {table}(id_TG,user_name) VALUES (?,?)"""
         date = (id_tg, name_user)
         sql.execute(sql_add, date)
         db.commit()
@@ -24,11 +25,12 @@ def add_user_db(id_tg: int, name_user: str, table: str = 'user'):
         return False
 
 
-def del_user_db(id_tg: int, table: str = 'user') -> None:
+def del_user_db(id_tg: int, table: str = 'user'):
     """
     Удаление пользователя из базы данных
-    :param id_tg:
-    :return:
+    :param table: название таблицы в которую будем вносить изменения
+    :param id_tg: id telegram аккаунта
+    :return: None
     """
     db = sqlite3.connect(file_db)
     sql = db.cursor()
@@ -37,17 +39,18 @@ def del_user_db(id_tg: int, table: str = 'user') -> None:
     db.close()
 
 
-def update_user_db(argument_replace: str or int, new_argument: str or int, tg_id: int, database: str = 'user') -> None:
+def update_user_db(argument_replace: str or int, new_argument: str or int, tg_id: int, table: str = 'user'):
     """
-    Обнавление данных
+    Обновление данных
+    :param table: таблица в которую будем вносить изменения
     :param argument_replace: значение которе нужно поменять
     :param new_argument: новое значение
-    :param tg_id: вибирает строску для замены
-    :return:
+    :param tg_id: выбирает строку для замены
+    :return: None
     """
     db = sqlite3.connect(file_db)
     sql = db.cursor()
-    sql_update = (f"""UPDATE {database} SET {argument_replace} = ? WHERE id_TG = ? """)
+    sql_update = f"""UPDATE {table} SET {argument_replace} = ? WHERE id_TG = ? """
     date = (new_argument, tg_id)
     sql.execute(sql_update, date)
     db.commit()
@@ -67,8 +70,9 @@ def is_user(id_tg: int, table: str = 'user') -> bool:
     """
     Функция получает id_tg и проходится по базе данных собирает в один список,
     проверяет есть ли этот id, если есть возвращает True
-    :param id_tg:
-    :return:
+    :param table: таблица в которую будем вносить изменения
+    :param id_tg: id аккаунта telegram
+    :return: bool (True, False)
     """
     db = sqlite3.connect(file_db)
     sql = db.cursor()
@@ -83,7 +87,7 @@ def is_user(id_tg: int, table: str = 'user') -> bool:
         return False
 
 
-def get_user_name(id_tg: int, table: str = 'user') -> str:
+def get_user_name(id_tg: int, table: str = 'user'):
     """
     Получения user_name из базы данных
 
@@ -102,17 +106,17 @@ def get_user_name(id_tg: int, table: str = 'user') -> str:
 
 def show_table() -> list:
     """
-    Функция для отобрацения таблиц в базе данных 
+    Функция для отображения таблиц в базе данных
 
     - file_db - база данных
-    return: list_datebase - cписок таблиц которые есть в бд
+    return: list_database - cписок таблиц которые есть в бд
     """
     db = sqlite3.connect(file_db)
     sql = db.cursor()
-    list_datebase = []
+    list_database = []
     sql.execute("""select * from sqlite_master
             where type = 'table'""")
     tables = sql.fetchall()
     for table in tables:
-        list_datebase.append(table[1])
-    return list_datebase
+        list_database.append(table[1])
+    return list_database

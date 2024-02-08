@@ -1,14 +1,15 @@
 class TxtHandler:
     """
-    Клас преднозначен для работы с файлами txt формата
+    Клас предназначен для работы с файлами txt формата
 
-    Мtтоды:
+    Методы:
     - txt_read - Функция для чтения txt файлов
     - txt_write -  Функция для записи  txt файлов
     - txt_add -  Функция для добавления данных в txt файл
     """
+
     @staticmethod
-    def txt_read(path:str, encoding:str = 'utf-8') -> str:
+    def txt_read(path: str, encoding: str = 'utf-8') -> str:
         """
         Функция для чтения txt файлов
 
@@ -16,13 +17,12 @@ class TxtHandler:
         - encoding - кодировка 
         return: data
         """
-        with open(path,'r', encoding=encoding) as file:
+        with open(path, 'r', encoding=encoding) as file:
             data = file.read()
             return data
-        
-        
+
     @staticmethod
-    def txt_write(data: str, path:str, encoding:str = 'utf-8') -> None:
+    def txt_write(data: str, path: str, encoding: str = 'utf-8') -> None:
         """
         Функция для записи  txt файлов
 
@@ -31,12 +31,11 @@ class TxtHandler:
         - encoding - кодировка 
         return: None
         """
-        with open(path,'w', encoding=encoding) as file:
+        with open(path, 'w', encoding=encoding) as file:
             file.write(data)
 
-
     @staticmethod
-    def txt_add(data: str,path:str, encoding:str = 'utf-8') -> None:
+    def txt_add(data: str, path: str, encoding: str = 'utf-8') -> None:
         """
         Функция для добавления данных в txt файл
 
@@ -45,6 +44,5 @@ class TxtHandler:
         - encoding - кодировка 
         return: None
         """
-        with open(path,'a', encoding=encoding) as file:
+        with open(path, 'a', encoding=encoding) as file:
             file.write(data)
-
