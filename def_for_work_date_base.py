@@ -39,7 +39,7 @@ def del_user_db(id_tg: int, table: str = 'user'):
     db.close()
 
 
-def update_user_db(argument_replace: str or int, new_argument: str or int, tg_id: int, table: str = 'user'):
+def update_user_db(argument_replace: str, new_argument: str, tg_id: int, table: str = 'user'):
     """
     Обновление данных
     :param table: таблица в которую будем вносить изменения

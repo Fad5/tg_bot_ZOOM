@@ -2,6 +2,9 @@ from aiogram import types
 
 
 def get_kb_list_db() -> types.ReplyKeyboardMarkup:
+    """
+    Функция будет выполнятся в машине состояний StatesdataBase
+    """
     kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
     kb.add(types.KeyboardButton('Показать список DataBase'))
     kb.add(types.KeyboardButton('Отмена'))
