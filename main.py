@@ -21,7 +21,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=storge)
 
 # Функция, которая забирает с сайта файл сортирует и сохраняет в csv файл
-#create_cvs_file()
+create_cvs_file()
 
 # Клавиатура
 kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
