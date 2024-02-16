@@ -21,7 +21,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=storge)
 
 # Функция, которая забирает с сайта файл сортирует и сохраняет в csv файл
-create_cvs_file()
+#create_cvs_file()
 
 # Клавиатура
 kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -432,7 +432,8 @@ async def get_hours_summa_current(massage: types.Message, summa: float = 0) -> N
         date_list = check_hours_month('current_list_hours')
         for i in (get_info_work_day(result)):
             hours = read_js_hours(i, date_list)
-            if hours is not None:
+            print(hours)
+            if hours is  None:
                 pass
             else:
                 summa = summa + float(hours[0])

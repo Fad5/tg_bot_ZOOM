@@ -11,9 +11,7 @@ def create_cvs_file() -> None:
     """
     df = pd.read_csv(
         'https://docs.google.com/spreadsheets/d/1vZc0LfpNmLZKnvn4EiEeD-HTZE5UJ2wBZX5fOF6FtBk/export?format=csv')
-
     column_names = df.keys().tolist()
-    print(column_names)
 
     new_df = df[
         [column_names[0], column_names[1], column_names[2], column_names[3], column_names[4], column_names[5],

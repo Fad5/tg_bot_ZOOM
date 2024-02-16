@@ -42,6 +42,7 @@ def from_watch_in_hours(element: str) -> float | None:
     разделяет методом split по знаку "-", (XX:XX, XX:XX), получаем сумму минут от первого и второго значнеие,
     находим разницу и возвращаем это значение
     """
+    print(element)
     if element == '':
         return None
     else:
@@ -153,7 +154,9 @@ def read_js_hours(work_day: dict, date_base_day: list):
         data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
         if data_sort in date_base_day:
             if work_day['Link to post'][:27] == invalid_link_to_post:
-                if work_day['Hours'] is not None:
+                if work_day['Hours'] == None:
+                    pass
+                else:
                     hours = work_day['Hours']
                     print_hours_day = f'🗓 {work_day["Data"]}    🕰 {str("%.2f" % work_day["Hours"])}\n'
                     return hours, print_hours_day
