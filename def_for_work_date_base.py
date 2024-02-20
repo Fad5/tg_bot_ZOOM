@@ -57,10 +57,17 @@ def update_user_db(argument_replace: str, new_argument: str, tg_id: int, table: 
     db.close()
 
 
-def show_db(table: str, message='') -> list:
+def show_db(table: str) -> str:
+    """
+    Функция выбирает из базы данных и возвращает их 
+
+    :param table: название таблицы из которой будем получать данные
+    :return: Строковое значение в котором находится id и имя в excel
+    """
     db = sqlite3.connect(file_db)
     sql = db.cursor()
     sql.execute(f"""SELECT *  FROM {table} WHERE id_TG !=''""")
+    message = ''
     for i in sql:
         message = message + f'▪️ id: <code>{i[0]}</code>  name: {i[1]}\n'
     return message

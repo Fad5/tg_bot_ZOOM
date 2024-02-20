@@ -1,6 +1,7 @@
 import datetime
 import pandas as pd
 import threading
+
 from Work_with_file import TxtHandler
 
 
@@ -19,7 +20,5 @@ def create_cvs_file() -> None:
          column_names[9], column_names[10], column_names[11], column_names[12], column_names[13],
          column_names[14]]]  # Выберем из даты фрейма столбцы и сохраним в новый дате фрейм
     new_df.to_csv('data_base.csv', index=False)  # Экспорт в CSV файл
-    info = 'Successful ' + str(datetime.datetime.now())
-    print(info)
-    TxtHandler.txt_write(info, 'report_parsing.txt')
+    print('Successful')
     threading.Timer(3600, create_cvs_file).start()

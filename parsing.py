@@ -1,8 +1,9 @@
 import csv
 import datetime
+from typing import Any
+
 from value_sort import days
 from config import invalid_link_to_post
-from typing import Any
 
 
 def formatting_noted(txt: str) -> str:

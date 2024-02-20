@@ -1,16 +1,16 @@
-from keybords_for_bot import get_kb_list_db, get_kb_start
 from aiogram import Bot, Dispatcher, types, executor, filters
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
+import datetime
+import os
+
+from keybords_for_bot import get_kb_list_db, get_kb_start
+from sort_work_day import create_cvs_file
 from config import answer_block, TEXT_HOLIDAY, list_info
 from accounts import TOKEN, ACCOUNTS_ZOOM, ACCOUNTS_WEBINAR
 from parsing import get_info_work_day, read_js, read_js_day, read_js_hours
-from sort_work_day import create_cvs_file
 from value_sort import get_password_mail, list_work_day, check_hours_month
-
-# Функции для роботов с txt
-from Work_with_file import TxtHandler
 
 # Функции для работы с бд
 from def_for_work_date_base import is_user, show_db, del_user_db, add_user_db, update_user_db, get_user_name, show_table
@@ -21,7 +21,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=storge)
 
 # Функция, которая забирает с сайта файл сортирует и сохраняет в csv файл
-create_cvs_file()
+# create_cvs_file()
 
 # Клавиатура
 kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -96,8 +96,9 @@ async def update_user(massage: types.Message) -> None:
     Функция читает report_parsing.txt и отправляет последние значение,
     последнее обновление файла data_base.csv
     """
-    data = TxtHandler.txt_read('report_parsing.txt')
-    await bot.send_message(massage.from_user.id, text=data[11:30])
+    date_update_file_unix = os.path.getmtime('data_base.csv')
+    date_update_file = str(datetime.datetime.fromtimestamp(date_update_file_unix))
+    await bot.send_message(massage.from_user.id, text=date_update_file[:-7])
 
 
 @dp.message_handler(commands='upd')
@@ -433,7 +434,7 @@ async def get_hours_summa_current(massage: types.Message, summa: float = 0) -> N
         for i in (get_info_work_day(result)):
             hours = read_js_hours(i, date_list)
             print(hours)
-            if hours is  None:
+            if hours is None:
                 pass
             else:
                 summa = summa + float(hours[0])
