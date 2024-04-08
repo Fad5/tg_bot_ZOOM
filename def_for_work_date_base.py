@@ -69,7 +69,7 @@ def show_db(table: str) -> str:
     sql.execute(f"""SELECT *  FROM {table} WHERE id_TG !=''""")
     message = ''
     for i in sql:
-        message = message + f'▪️ id: <code>{i[0]}</code>  name: {i[1]}\n'
+        message = message + f'▪️ id: <code>{i[0]}</code>  name: {i[1]}     notification:    {i[2]}\n'
     return message
 
 
@@ -127,3 +127,22 @@ def show_table() -> list:
     for table in tables:
         list_database.append(table[1])
     return list_database
+
+
+def show_db_notification(table: str) -> str:
+    """
+    Функция выбирает из базы данных и возвращает их
+
+    :param table: название таблицы из которой будем получать данные
+    :return: Строковое значение в котором находится id и имя в excel
+    """
+    db = sqlite3.connect(file_db)
+    sql = db.cursor()
+    sql.execute(f"""SELECT *  FROM {table} WHERE id_TG !=''""")
+    data = []
+    for i in sql:
+        if i[2] != 'True':
+            pass
+        else:
+            data.append([i[0], i[1]])
+    return data

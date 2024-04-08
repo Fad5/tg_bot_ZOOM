@@ -43,7 +43,7 @@ def from_watch_in_hours(element: str) -> float | None:
     разделяет методом split по знаку "-", (XX:XX, XX:XX), получаем сумму минут от первого и второго значнеие,
     находим разницу и возвращаем это значение
     """
-    print(element)
+
     if element == '':
         return None
     else:
@@ -163,5 +163,24 @@ def read_js_hours(work_day: dict, date_base_day: list):
                     return hours, print_hours_day
             else:
                 pass
+    else:
+        pass
+
+
+def read_js_notification(work_day, argument, day_read=1):
+    """
+    Функция проходится по файлу csv и получит дату, если дата совпадает с заданной в argument,
+    то мы получим этот элемент преобразовываем и помещаем в переменную description и возвращаем
+    :param work_day:
+    :param argument:
+    :param day_read:
+    :return:
+    """
+    if work_day['Data'] not in invalid_link_to_post:
+        date_json = work_day['Data']
+        data_sort = datetime.datetime.strptime(date_json, '%Y-%m-%d').date()
+        if data_sort == days(argument, day=day_read):
+            description_for_show_work_day = work_day['Data'], work_day['Time']
+            return description_for_show_work_day
     else:
         pass

@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Bot, Dispatcher, types, executor, filters
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -6,6 +8,7 @@ import datetime
 import os
 
 from keybords_for_bot import get_kb_list_db, get_kb_start
+from notification import users_is_notifications, hours_correct
 from sort_work_day import create_cvs_file
 from config import answer_block, TEXT_HOLIDAY, list_info
 from accounts import TOKEN, ACCOUNTS_ZOOM, ACCOUNTS_WEBINAR
@@ -13,7 +16,8 @@ from parsing import get_info_work_day, read_js, read_js_day, read_js_hours
 from value_sort import get_password_mail, list_work_day, check_hours_month
 
 # Функции для работы с бд
-from def_for_work_date_base import is_user, show_db, del_user_db, add_user_db, update_user_db, get_user_name, show_table
+from def_for_work_date_base import (is_user, show_db, del_user_db, add_user_db,
+                                    update_user_db, get_user_name, show_table)
 
 storge = MemoryStorage()
 
@@ -21,7 +25,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=storge)
 
 # Функция, которая забирает с сайта файл сортирует и сохраняет в csv файл
-# create_cvs_file()
+create_cvs_file()
 
 # Клавиатура
 kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -98,7 +102,16 @@ async def update_user(massage: types.Message) -> None:
     """
     date_update_file_unix = os.path.getmtime('data_base.csv')
     date_update_file = str(datetime.datetime.fromtimestamp(date_update_file_unix))
-    await bot.send_message(massage.from_user.id, text=date_update_file[:-7])
+    info_data_update = date_update_file[:-7]
+    await bot.send_message(massage.from_user.id, text=info_data_update)
+
+
+@dp.message_handler(commands='last_upd')
+async def upd_user(message: types.Message) -> None:
+    date_update_file_unix = os.path.getmtime('data_base.csv')
+    date_update_file = str(datetime.datetime.fromtimestamp(date_update_file_unix))
+    info_data_update = date_update_file[:-7]
+    await bot.send_message(message.from_user.id, text=info_data_update)
 
 
 @dp.message_handler(commands='upd')
@@ -482,7 +495,7 @@ async def get_hours_summa_last(massage: types.Message, summa: float = 0, print_h
 # /get_list_hours_last_month - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
 # по data_base.csv файлу и возвращает список часов в прошлом месяце
 @dp.message_handler(commands=f'get_list_hours_last_month')
-async def get_hours_list_last(massage: types.Message, summa: int = 0, print_hours: str = '') -> None:
+async def get_hours_list_last(massage: types.Message, print_hours: str = '') -> None:
     result = get_user_name(massage.from_user.id, 'user')
     if result is not None:
         date_list = check_hours_month('last_list_hours')
@@ -537,5 +550,22 @@ async def echo(massage: types.Message):
     await bot.send_message(massage.from_user.id, massage.text)
 
 
+chat_ids = {'429845350'}
+
+
+async def notification(sleep_for):
+    while True:
+        await asyncio.sleep(sleep_for)
+        for i in users_is_notifications:
+            user_name = i[1]
+            user_id = i[0]
+            data = get_info_work_day(user_name)
+            is_zoom = hours_correct(data)
+            if is_zoom:
+                await bot.send_message(user_id, f'{user_name} запусти zoom через час', disable_notification=True)
+
+
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.create_task(notification(60))
     executor.start_polling(dp, skip_updates=True)
