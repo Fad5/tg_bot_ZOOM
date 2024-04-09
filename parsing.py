@@ -112,12 +112,20 @@ def read_js(work_day, argument, day_read=1):
         if data_sort == days(argument, day=day_read):
             description_for_show_work_day = (
                 f"🎓 Программа: {work_day['Program']} \n📗Предмет: {work_day['Item']}\n👨‍🏫Преподаватель:"
-                f" {work_day['Teacher']}\n🗓Дата: "
+                f" {get_code_teacher(work_day['Teacher'])}\n🗓Дата: "
                 f"{work_day['Data']}\n🕐Время: {work_day['Time']}\n❗Примечание: {work_day['Note']}\n📌Оператор:"
                 f" {work_day['Operator']}\n🔒Аккаунт: {work_day['Account']}.")
             return description_for_show_work_day
     else:
         pass
+
+
+def get_code_teacher(data):
+    data_split = data.split(' ')
+    teacher = data_split[0]
+    result = ' '.join(data_split[1:])
+    result = f'<code>{teacher}</code> ' + result
+    return result
 
 
 def read_js_day(work_day: dict, date_base_day: list):

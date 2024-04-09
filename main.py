@@ -383,12 +383,12 @@ async def get_today_work_day(massage: types.Message):
             info = read_js(work_day=i, argument='')
             if info is not None:
                 list_info.append(info)
-                await massage.answer(info)
+                await massage.answer(info, parse_mode='HTML')
         if not list_info:
             await bot.send_message(massage.from_user.id, text=TEXT_HOLIDAY)
         list_info.clear()
     else:
-        await bot.send_message(massage.from_user.id, text=answer_block)
+        await bot.send_message(massage.from_user.id, parse_mode='HTML', text=answer_block)
 
 
 # /tomorrow - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
@@ -406,12 +406,12 @@ async def get_tomorrow_work_day(massage: types.Message) -> None:
             info = read_js(work_day=i, argument='next')
             if info is not None:
                 list_info.append(info)
-                await massage.answer(info)
+                await massage.answer(info, parse_mode='HTML')
         if not list_info:
             await bot.send_message(massage.from_user.id, text=TEXT_HOLIDAY)
         list_info.clear()
     else:
-        await bot.send_message(massage.from_user.id, text=answer_block)
+        await bot.send_message(massage.from_user.id, parse_mode='HTML', text=answer_block)
 
 
 # /yesterday - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
@@ -429,12 +429,12 @@ async def get_yesterday_work_day(massage: types.Message) -> None:
             info = read_js(work_day=i, argument='last')
             if info is not None:
                 list_info.append(info)
-                await massage.answer(info)
+                await massage.answer(info, parse_mode='HTML')
         if not list_info:
             await bot.send_message(massage.from_user.id, text=TEXT_HOLIDAY)
         list_info.clear()
     else:
-        await bot.send_message(massage.from_user.id, text=answer_block)
+        await bot.send_message(massage.from_user.id, parse_mode='HTML', text=answer_block)
 
 
 # /get_summa_hours_current_month - функция сначала смотрит есть ли вы в базе данных, а потом проходится 
@@ -548,9 +548,6 @@ async def show_password_mail_webinar(callback_query: types.CallbackQuery):
 @dp.message_handler()
 async def echo(massage: types.Message):
     await bot.send_message(massage.from_user.id, massage.text)
-
-
-chat_ids = {'429845350'}
 
 
 async def notification(sleep_for):

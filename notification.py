@@ -19,7 +19,7 @@ def plus_hours(data_zoom):
     date = get_data(data_zoom)
     start_time = date.split('-')
     time_split = start_time[0].split(':')
-    time = int(time_split[0]) + 1
+    time = int(time_split[0]) - 1
     time = f'{time}:{time_split[1]}'
     return time
 
