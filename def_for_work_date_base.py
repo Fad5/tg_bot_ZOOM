@@ -129,7 +129,7 @@ def show_table() -> list:
     return list_database
 
 
-def show_db_notification(table: str) -> str:
+def show_db_notification(table: str) -> list[list]:
     """
     Функция выбирает из базы данных и возвращает их
 

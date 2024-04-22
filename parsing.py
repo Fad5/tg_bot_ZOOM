@@ -55,7 +55,7 @@ def from_watch_in_hours(element: str) -> float | None:
         fist_time = formatting_elements[0].find(':')
         second_time = formatting_elements[1].find(':')
         start_time = int(formatting_elements[0][:fist_time]) * 60 + int(formatting_elements[0][fist_time + 1:])
-        finish_time = int(formatting_elements[1][:second_time]) * 60 + int(formatting_elements[1][second_time + 1:])
+        finish_time = int(formatting_elements[1][:second_time]) * 60 + int(formatting_elements[1][second_time + 1:5])
         summa_hours = finish_time - start_time
         result = float(summa_hours / 60)
         return result

@@ -8,7 +8,7 @@ import datetime
 import os
 
 from keybords_for_bot import get_kb_list_db, get_kb_start
-from notification import users_is_notifications, hours_correct
+from notification import users_is_notifications, hours_correct, data_, get_hour_notification
 from sort_work_day import create_cvs_file
 from config import answer_block, TEXT_HOLIDAY, list_info
 from accounts import TOKEN, ACCOUNTS_ZOOM, ACCOUNTS_WEBINAR
@@ -25,7 +25,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=storge)
 
 # Функция, которая забирает с сайта файл сортирует и сохраняет в csv файл
-create_cvs_file()
+#create_cvs_file()
 
 # Клавиатура
 kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -446,7 +446,6 @@ async def get_hours_summa_current(massage: types.Message, summa: float = 0) -> N
         date_list = check_hours_month('current_list_hours')
         for i in (get_info_work_day(result)):
             hours = read_js_hours(i, date_list)
-            print(hours)
             if hours is None:
                 pass
             else:
@@ -554,10 +553,10 @@ async def notification(sleep_for):
     while True:
         await asyncio.sleep(sleep_for)
         for i in users_is_notifications:
+            print(users_is_notifications)
             user_name = i[1]
             user_id = i[0]
-            data = get_info_work_day(user_name)
-            is_zoom = hours_correct(data)
+            is_zoom = get_hour_notification(user_name)
             if is_zoom:
                 await bot.send_message(user_id, f'{user_name} запусти zoom через час', disable_notification=True)
 
